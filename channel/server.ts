@@ -5,7 +5,7 @@
  * A private 1:1 bridge between this CC session (the AI) and a person's phone
  * PWA, routed through your own relay backend.
  *
- * Forked from the official Telegram channel plugin — same channel CONTRACT
+ * Based on the same channel contract as other Claude Code channel plugins.
  * (inbound: notifications/claude/channel → <channel> blocks; outbound: a
  * reply tool), but the TRANSPORT is swapped:
  *
@@ -14,7 +14,7 @@
  *          · down: SSE stream  GET  {RELAY}/channel/in   (human → AI)
  *          · up:   POST        POST {RELAY}/channel/out  (AI → human)
  *
- * Single-user: no pairing/allowlist (Telegram needed those for an open bot;
+ * Single-user: no pairing/allowlist (public bot channels need those;
  * here both ends share one secret and the relay is the only peer).
  *
  * Loaded via:
@@ -35,7 +35,7 @@ const INBOX_DIR = join(STATE_DIR, 'inbox') // attachments land here so the AI ca
 const IN_LAST_FILE = join(STATE_DIR, 'last_in_id')
 
 // CC-spawned MCP servers get no env block — load secrets from a file. Real env wins.
-// (Same reason the Telegram plugin reads its token from a .env: the process
+// (Same reason channel plugins read tokens from a .env: the process
 //  inherits nothing from the launcher, so the secret lives on disk.)
 try {
   for (const line of readFileSync(ENV_FILE, 'utf8').split('\n')) {

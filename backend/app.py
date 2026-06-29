@@ -26,7 +26,9 @@ import re
 import secrets
 import subprocess
 import sqlite3
+import urllib.error
 import urllib.request
+import urllib.parse
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -78,6 +80,13 @@ PUSH_PREVIEW_CHARS = int(os.environ.get("RELAY_PUSH_PREVIEW_CHARS", "120"))
 # --- presence tuning (seconds) ---------------------------------------------
 PRESENCE_ONLINE_SEC = int(os.environ.get("RELAY_PRESENCE_ONLINE_SEC", "180"))
 PRESENCE_RECENT_SEC = int(os.environ.get("RELAY_PRESENCE_RECENT_SEC", "1800"))
+
+# --- Optional server-side API loop -----------------------------------------
+# "desktop" keeps the original Claude Code channel path. "loop" forwards new
+# human messages to a local HTTP loop, which replies through /channel/out.
+BRAIN_FILE = Path(os.environ.get("RELAY_BRAIN_FILE", str(Path(__file__).parent / "brain_target")))
+LOOP_INGEST_URL = os.environ.get("RELAY_LOOP_INGEST_URL", "http://127.0.0.1:3020/loop/ingest")
+STREAM_DRAFT_TTL = int(os.environ.get("RELAY_STREAM_DRAFT_TTL", "600"))
 
 if not SECRET:
     raise SystemExit("RELAY_SECRET is required (set it in the systemd EnvironmentFile)")
@@ -170,6 +179,28 @@ def history(since: int, limit: int) -> list:
             "SELECT * FROM messages WHERE id > ? ORDER BY id ASC LIMIT ?",
             (since, limit),
         ).fetchall()
+    return rows_to_messages(rows)
+
+
+def history_for_session(session_id: str, since: int, limit: int) -> list:
+    session_id = (session_id or "").strip()
+    if not session_id:
+        return history(since, limit)
+    with db() as conn:
+        if session_id == "__legacy__":
+            rows = conn.execute(
+                "SELECT * FROM messages "
+                "WHERE id > ? AND (json_extract(meta, '$.api_session') IS NULL OR json_extract(meta, '$.api_session') = '') "
+                "ORDER BY id ASC LIMIT ?",
+                (since, limit),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM messages "
+                "WHERE id > ? AND json_extract(meta, '$.api_session') = ? "
+                "ORDER BY id ASC LIMIT ?",
+                (since, session_id, limit),
+            ).fetchall()
     return rows_to_messages(rows)
 
 
@@ -287,6 +318,7 @@ def notification_from_message(msg: dict) -> dict:
 
 plugin_subs: set[asyncio.Queue] = set()  # AI side    (GET /channel/in)
 app_subs: set[asyncio.Queue] = set()     # human side (GET /app/stream)
+stream_drafts: dict[tuple[str, str], dict] = {}
 
 
 async def broadcast(subs: set, payload: dict) -> None:
@@ -315,6 +347,122 @@ def plugin_payload(msg: dict) -> dict:
         "ts": msg["ts"],
         "attachments": meta.get("attachments") or [],
     }
+
+
+def brain_target() -> str:
+    try:
+        target = BRAIN_FILE.read_text(encoding="utf-8").strip()
+        return target if target in ("desktop", "loop") else "desktop"
+    except FileNotFoundError:
+        return "desktop"
+    except Exception:
+        return "desktop"
+
+
+def _forward_to_loop_sync(msg: dict) -> None:
+    meta = msg.get("meta") or {}
+    data = json.dumps({
+        "id": msg.get("id"),
+        "text": msg.get("text", ""),
+        "session_id": meta.get("api_session") or "",
+    }, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        LOOP_INGEST_URL,
+        data=data,
+        method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    urllib.request.urlopen(req, timeout=10).read()
+
+
+async def forward_to_loop(msg: dict) -> None:
+    try:
+        await asyncio.to_thread(_forward_to_loop_sync, msg)
+    except Exception as exc:
+        print(f"[loop] forward failed: {type(exc).__name__}: {exc}")
+
+
+def prune_stream_drafts() -> None:
+    now = datetime.now(timezone.utc).timestamp()
+    stale = [k for k, v in stream_drafts.items() if now - float(v.get("updated_at") or 0) > STREAM_DRAFT_TTL]
+    for k in stale:
+        stream_drafts.pop(k, None)
+
+
+async def handle_stream_delta(kind: str, body: dict) -> dict:
+    base_kind = kind[:-6] if kind.endswith("_delta") else kind
+    if base_kind not in ("thinking", "reply"):
+        raise HTTPException(status_code=400, detail="unknown stream kind")
+    stream_id = str(body.get("stream_id") or "").strip()
+    if not stream_id:
+        raise HTTPException(status_code=400, detail="stream_id required")
+
+    done = bool(body.get("done"))
+    chunk = str(body.get("text") or "")
+    meta = {k: v for k, v in body.items() if k not in ("type", "text", "done", "final_text")}
+    meta["stream_id"] = stream_id
+    key = (stream_id, base_kind)
+    prune_stream_drafts()
+
+    now_ts = datetime.now(timezone.utc).timestamp()
+    draft = stream_drafts.get(key)
+    if not draft:
+        draft = {"text": "", "meta": meta, "ts": now_iso(), "updated_at": now_ts}
+        stream_drafts[key] = draft
+    draft["text"] += chunk
+    if done and isinstance(body.get("final_text"), str):
+        draft["text"] = body.get("final_text") or ""
+    draft["meta"].update(meta)
+    draft["updated_at"] = now_ts
+
+    if not done:
+        await broadcast(app_subs, {
+            "type": kind,
+            "stream_id": stream_id,
+            "text": chunk,
+            "done": False,
+            "ts": draft["ts"],
+            "api_session": draft["meta"].get("api_session") or "",
+        })
+        return {"ok": True, "stream_id": stream_id, "draft": True}
+
+    text = draft.get("text") or ""
+    stream_drafts.pop(key, None)
+    if not text:
+        return {"ok": True, "stream_id": stream_id, "saved": False}
+    msg = save_message("out", base_kind, text, dict(draft.get("meta") or {}))
+    await broadcast(app_subs, {"type": "typing", "active": False})
+    await broadcast(app_subs, app_payload(msg))
+    if base_kind == "reply" and not app_subs:
+        try:
+            await push_to_all(notification_from_message(msg))
+        except Exception:
+            pass
+    return {"id": msg["id"], "stream_id": stream_id, "saved": True}
+
+
+def loop_base_url() -> str:
+    parsed = urllib.parse.urlparse(LOOP_INGEST_URL)
+    if not parsed.scheme or not parsed.netloc:
+        return "http://127.0.0.1:3020"
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+def loop_json(path: str, method: str = "GET", body=None):
+    data = None
+    headers = {"Content-Type": "application/json"}
+    if body is not None:
+        data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(loop_base_url() + path, data=data, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=35) as resp:
+            raw = resp.read().decode("utf-8")
+            return json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")[:500]
+        raise HTTPException(status_code=exc.code, detail=detail)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"loop proxy error: {exc}")
 
 
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -514,6 +662,8 @@ async def channel_out(request: Request):
     check_auth(request)
     body = await request.json()
     kind = body.get("type", "reply")
+    if kind in ("thinking_delta", "reply_delta"):
+        return await handle_stream_delta(kind, body)
     if kind == "react":
         # An emoji reaction attached to an existing message's meta.reactions; no new
         # message is created. An empty emoji clears that reaction.
@@ -555,11 +705,19 @@ async def app_send(request: Request):
     body = await request.json()
     text = (body.get("text") or "").strip()
     attachments = body.get("attachments") if isinstance(body.get("attachments"), list) else []
+    api_session = str(body.get("api_session") or body.get("session_id") or "").strip()
     if not text and not attachments:
         raise HTTPException(status_code=400, detail="empty text")
-    msg = save_message("in", "user", text, {"user": "human", "attachments": attachments})
-    # to the AI — the shape the plugin's deliverInbound() expects
-    await broadcast(plugin_subs, plugin_payload(msg))
+    meta = {"user": "human", "attachments": attachments}
+    if api_session:
+        meta["api_session"] = api_session
+    msg = save_message("in", "user", text, meta)
+    # Route to exactly one AI body. "desktop" keeps the Claude Code channel;
+    # "loop" calls the optional server-side API loop.
+    if brain_target() == "loop":
+        asyncio.create_task(forward_to_loop(msg))
+    else:
+        await broadcast(plugin_subs, plugin_payload(msg))
     # echo to the PWA so the sender's bubble + other tabs stay in sync
     await broadcast(app_subs, app_payload(msg))
     # the AI starts processing — push a typing state to the PWA
@@ -700,7 +858,8 @@ def latest_message():
 
 @app.post("/app/ping")
 async def app_ping(request: Request):
-    """PWA foreground heartbeat. Not strictly authed (only the owner's PWA pings; it still sends the token)."""
+    """PWA foreground heartbeat."""
+    check_auth(request)
     global _last_seen_ts
     _last_seen_ts = datetime.now(timezone.utc)
     return {"ok": True}
@@ -709,6 +868,7 @@ async def app_ping(request: Request):
 @app.get("/app/status")
 async def app_status(request: Request):
     """Presence state + the time/direction of the most recent message. Metadata only, no message text."""
+    check_auth(request)
     now = datetime.now(timezone.utc)
     state, seen_age = _presence_state(now)
     last_msg = latest_message()
@@ -736,9 +896,10 @@ async def app_status(request: Request):
 
 
 @app.get("/app/history")
-async def app_history(request: Request, since: int = 0, limit: int = 200):
+async def app_history(request: Request, since: int = 0, limit: int = 200, session_id: str = ""):
     check_auth(request)
-    return {"messages": [app_payload(m) for m in history(since, min(limit, 500))]}
+    rows = history_for_session(session_id, since, min(limit, 500)) if session_id else history(since, min(limit, 500))
+    return {"messages": [app_payload(m) for m in rows]}
 
 
 @app.get("/app/stream")
@@ -751,8 +912,9 @@ async def app_stream(request: Request):
 # ---- web push subscription management --------------------------------------
 
 @app.get("/app/vapid_public")
-async def app_vapid_public():
+async def app_vapid_public(request: Request):
     """Public key the PWA needs to subscribe (not a secret — safe to expose)."""
+    check_auth(request)
     return {"key": VAPID_PUBLIC_KEY}
 
 
@@ -794,6 +956,63 @@ async def app_push_test(request: Request):
     text = (body.get("text") if isinstance(body, dict) else None) or f"测试通知 · {AI_NAME}在这儿"
     res = await push_to_all({"title": AI_NAME, "body": text, "url": APP_PATH, "id": 0})
     return {"ok": True, **res}
+
+
+# ---- optional API loop control --------------------------------------------
+
+@app.get("/app/brain")
+async def get_brain(request: Request):
+    check_auth(request)
+    return {"target": brain_target()}
+
+
+@app.post("/app/brain")
+async def set_brain(request: Request):
+    check_auth(request)
+    body = await request.json()
+    target = str(body.get("target") or "").strip()
+    if target not in ("desktop", "loop"):
+        raise HTTPException(status_code=400, detail="target must be 'desktop' or 'loop'")
+    BRAIN_FILE.write_text(target, encoding="utf-8")
+    return {"target": target}
+
+
+@app.get("/app/loop_config")
+async def get_loop_config(request: Request):
+    check_auth(request)
+    return loop_json("/loop/config")
+
+
+@app.post("/app/loop_config")
+async def set_loop_config(request: Request):
+    check_auth(request)
+    return loop_json("/loop/config", method="POST", body=await request.json())
+
+
+@app.get("/app/sessions")
+async def app_sessions(request: Request):
+    check_auth(request)
+    return loop_json("/loop/sessions")
+
+
+@app.post("/app/sessions")
+async def app_sessions_create(request: Request):
+    check_auth(request)
+    body = await request.json()
+    if "since_id" not in body:
+        try:
+            with db() as conn:
+                row = conn.execute("SELECT MAX(id) AS id FROM messages").fetchone()
+                body["since_id"] = int(row["id"] or 0)
+        except Exception:
+            body["since_id"] = 0
+    return loop_json("/loop/sessions", method="POST", body=body)
+
+
+@app.patch("/app/sessions/{session_id}")
+async def app_sessions_patch(session_id: str, request: Request):
+    check_auth(request)
+    return loop_json(f"/loop/sessions/{urllib.parse.quote(session_id)}", method="PATCH", body=await request.json())
 
 
 if __name__ == "__main__":

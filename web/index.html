@@ -260,6 +260,154 @@
   .topbtn:active{ transform: scale(.9); }
   .topbtn svg{ width:24px; height:24px; display:block; }
   .topbtn.more svg{ width:22px; height:22px; }
+  .topbtn.terminal.active{ color:var(--accent); }
+  .session-pop{
+    position:absolute;
+    right: calc(var(--side-pad) + 34px);
+    top: calc(env(safe-area-inset-top) + clamp(58px, 8vw, 82px));
+    z-index:30;
+    width:min(82vw, 320px);
+    max-height:min(58vh, 480px);
+    overflow:auto;
+    padding:10px;
+    border-radius:18px;
+    background:var(--panel-bg);
+    border:1px solid var(--card-line);
+    box-shadow:0 18px 50px rgba(30,45,62,.18);
+    -webkit-backdrop-filter:blur(18px);
+    backdrop-filter:blur(18px);
+  }
+  .session-pop[hidden]{ display:none !important; }
+  .session-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 2px 8px; }
+  .session-title{ font-size:12px; color:var(--text-faint); font-family:var(--font-en), var(--font-cn); }
+  .session-new{
+    border:1px solid var(--seg-line); border-radius:999px; padding:5px 9px;
+    background:var(--seg-track); color:var(--text-soft); font:inherit; font-size:11.5px; cursor:pointer;
+  }
+  .session-list{ display:flex; flex-direction:column; gap:2px; }
+  .session-item{
+    border:0; width:100%; background:transparent; color:var(--text);
+    display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px;
+    padding:10px 9px; border-radius:12px; text-align:left; cursor:pointer; font:inherit;
+  }
+  .session-item.active{ background:var(--seg-track); }
+  .session-item:active{ transform:scale(.992); }
+  .session-main{ min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:3px; }
+  .session-name{ font-size:14px; line-height:1.25; }
+  .session-meta{ font-size:11px; color:var(--text-faint); font-family:var(--font-en), var(--font-cn); }
+  .session-rename{
+    border:0; background:transparent; color:var(--text-faint); width:28px; height:28px;
+    border-radius:50%; display:grid; place-items:center; cursor:pointer; padding:0;
+  }
+  .session-rename:hover{ color:var(--accent); background:var(--seg-track); }
+  .session-rename svg{ width:15px; height:15px; display:block; }
+  .terminal-panel{
+    position:fixed;
+    inset:0;
+    z-index:260;
+    display:flex;
+    flex-direction:column;
+    background:#050607;
+    color:#d7f7df;
+    font-family:"SFMono-Regular", Consolas, "Cascadia Mono", monospace;
+    transform:translateX(100%);
+    transition:transform .24s cubic-bezier(.2,.8,.2,1);
+  }
+  .terminal-panel.open{ transform:translateX(0); }
+  .terminal-top{
+    flex:none;
+    min-height:calc(52px + env(safe-area-inset-top));
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;
+    border-bottom:1px solid rgba(157,255,188,.18);
+    background:#080a0b;
+  }
+  .terminal-back{
+    flex:none;
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:50%;
+    background:transparent;
+    color:#d7f7df;
+    display:grid;
+    place-items:center;
+    padding:0;
+    cursor:pointer;
+  }
+  .terminal-back:active{ transform:scale(.9); }
+  .terminal-back svg{ width:21px; height:21px; display:block; }
+  .terminal-title{ min-width:0; display:flex; flex-direction:column; gap:2px; line-height:1.15; }
+  .terminal-title strong{ font-size:14px; font-weight:600; color:#effff4; }
+  .terminal-title span{
+    font-size:11px;
+    color:rgba(215,247,223,.62);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .terminal-log{
+    flex:1 1 auto;
+    overflow:auto;
+    padding:14px 14px 18px;
+    font-size:13px;
+    line-height:1.55;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+  }
+  .term-entry{ margin:0 0 13px; }
+  .term-user{ color:#9dffbc; }
+  .term-assistant{ color:#d7f7df; }
+  .term-tool{
+    color:#b6d6ff;
+    border-left:2px solid rgba(126,174,255,.45);
+    padding-left:10px;
+  }
+  .term-muted{ color:rgba(215,247,223,.48); }
+  .term-cmd{ color:#9dffbc; }
+  .term-err{ color:#ffb0a3; }
+  .terminal-form{
+    flex:none;
+    display:flex;
+    align-items:flex-end;
+    gap:9px;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-top:1px solid rgba(157,255,188,.18);
+    background:#080a0b;
+  }
+  .terminal-prompt{ flex:none; color:#9dffbc; font-size:15px; line-height:34px; }
+  .terminal-input{
+    flex:1 1 auto;
+    min-width:0;
+    max-height:120px;
+    border:0;
+    outline:0;
+    resize:none;
+    background:transparent;
+    color:#effff4;
+    font:inherit;
+    font-size:15px;
+    line-height:1.45;
+    padding:6px 0;
+  }
+  .terminal-input::placeholder{ color:rgba(215,247,223,.34); }
+  .terminal-send{
+    flex:none;
+    width:34px;
+    height:34px;
+    border:1px solid rgba(157,255,188,.34);
+    border-radius:50%;
+    background:rgba(157,255,188,.1);
+    color:#d7f7df;
+    display:grid;
+    place-items:center;
+    padding:0;
+    cursor:pointer;
+  }
+  .terminal-send:active{ transform:scale(.92); }
+  .terminal-send svg{ width:18px; height:18px; display:block; }
   .avatar{
     position:absolute; right: calc(var(--side-pad) - 3px); top: calc(env(safe-area-inset-top) + clamp(14px, 2.5vw, 36px));
     width: var(--avatar-size); height: var(--avatar-size); border-radius:50%; padding:0; flex:none; cursor:pointer;
@@ -422,7 +570,7 @@
   .row.ai .meta{ color: var(--text-faint); }
   .row.human .meta .tick,
   .row.ai .meta .tick{ color: var(--tick); }
-  /* 发送中:小时钟(Telegram 既视感),转完即送达 → 同位换成 ✓✓ */
+  /* 发送中:小时钟,转完即送达 → 同位换成 ✓✓ */
   .meta .tick.clock{ color: var(--tick); }
   .meta .tick.clock svg{ width: 1.05em; height: 1.05em; vertical-align: -0.18em; }
 
@@ -909,28 +1057,28 @@
     box-shadow: var(--seg-thumb-shadow); font-weight:500;
   }
 
-  /* forge slider */
-  .forge-slider-wrap{ padding:4px 2px 2px; }
-  .forge-slider{
+  /* context slider */
+  .context-slider-wrap{ padding:4px 2px 2px; }
+  .context-slider{
     -webkit-appearance:none; appearance:none;
     width:100%; height:4px; border-radius:999px;
     background: var(--slider-track);
     outline:none; cursor:pointer; margin:6px 0;
   }
-  .forge-slider::-webkit-slider-thumb{
+  .context-slider::-webkit-slider-thumb{
     -webkit-appearance:none; appearance:none;
     width:21px; height:21px; border-radius:50%;
     background: var(--slider-thumb);
     border:2.5px solid var(--card-bg);
     box-shadow: 0 3px 10px rgba(24,46,67,.26); cursor:pointer;
   }
-  .forge-slider::-moz-range-thumb{
+  .context-slider::-moz-range-thumb{
     width:21px; height:21px; border-radius:50%;
     background: var(--slider-thumb);
     border:2.5px solid var(--card-bg);
     box-shadow: 0 3px 10px rgba(24,46,67,.26); cursor:pointer;
   }
-  .forge-scale{
+  .context-scale{
     display:flex; justify-content:space-between; margin-top:9px;
     color: var(--text-faint);
     font-family: var(--font-en), var(--font-cn); font-size:11.5px;
@@ -1704,6 +1852,12 @@
       <span class="status" id="status">connecting…</span>
     </div>
     <div class="header-actions" aria-label="通话和更多操作">
+      <button class="topbtn sessions" id="sessionBtn" type="button" aria-label="API 窗口" title="API 窗口">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="14" height="14" rx="3"/><path d="M8 3h9a4 4 0 0 1 4 4v9"/></svg>
+      </button>
+      <button class="topbtn terminal" id="terminalBtn" type="button" aria-label="终端视图" title="终端视图">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m6 8 4 4-4 4"/><path d="M12 16h6"/></svg>
+      </button>
       <button class="topbtn call" id="callBtn" type="button" aria-label="语音通话（占位）" title="语音通话">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v2.4a2 2 0 0 1-2.2 2 19.4 19.4 0 0 1-8.4-3 19 19 0 0 1-5.9-5.9 19.4 19.4 0 0 1-3-8.4A2 2 0 0 1 4.5 2h2.4a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.4a15.6 15.6 0 0 0 6.6 6.6l1-1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 1.8z"/></svg>
       </button>
@@ -1713,6 +1867,13 @@
     </div>
     <button class="avatar hidden" id="avatarBtn" aria-label="查看个人信息" title="个人信息"></button>
   </header>
+  <div class="session-pop" id="sessionPop" hidden>
+    <div class="session-head">
+      <div class="session-title">API 窗口</div>
+      <button class="session-new" id="sessionNewBtn" type="button">新对话</button>
+    </div>
+    <div class="session-list" id="sessionList"></div>
+  </div>
   <main class="scroll" id="scroll">
     <div class="empty" id="empty">
       <div class="orb"></div>
@@ -1742,6 +1903,27 @@
     <span>新消息</span>
   </button>
 </div>
+
+<!-- ── Terminal renderer (same conversation, different skin) ── -->
+<section class="terminal-panel" id="terminalPanel" aria-label="终端视图" aria-hidden="true">
+  <header class="terminal-top">
+    <button class="terminal-back" id="terminalBack" type="button" aria-label="返回聊天">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="terminal-title">
+      <strong>companion terminal</strong>
+      <span id="terminalSession">same stream · current window</span>
+    </div>
+  </header>
+  <main class="terminal-log" id="terminalLog" aria-live="polite"></main>
+  <form class="terminal-form" id="terminalForm" autocomplete="off">
+    <span class="terminal-prompt" aria-hidden="true">&gt;</span>
+    <textarea class="terminal-input" id="terminalInput" rows="1" placeholder="type into the same conversation..." enterkeyhint="send" spellcheck="false"></textarea>
+    <button class="terminal-send" type="submit" aria-label="发送">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M6.5 10.5 12 5l5.5 5.5"/></svg>
+    </button>
+  </form>
+</section>
 
 <!-- ── Profile (full-screen page) ── -->
 <div class="profile-panel hidden" id="profilePanel" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
@@ -1788,6 +1970,16 @@
         <div class="push-hint" id="pushHint"></div>
       </section>
 
+      <!-- AI body routing -->
+      <section class="settings-card">
+        <div class="settings-label">联系 Claude <i class="info-i" title="Desktop＝Claude Code channel；API＝服务器上的 OpenAI-compatible loop。同一时刻只让一个身体接消息，避免双答。">i</i></div>
+        <div class="segmented" id="brainSeg" role="group" aria-label="联系方式">
+          <button type="button" data-val="desktop">Desktop</button>
+          <button type="button" data-val="loop">API</button>
+        </div>
+        <div class="push-hint" id="brainHint"></div>
+      </section>
+
       <!-- 模型选择（占位 · 假按键，以后接真切换）-->
       <section class="settings-card">
         <div class="settings-label">模型选择</div>
@@ -1811,12 +2003,12 @@
         </div>
       </section>
 
-      <!-- forge阈值（占位 · 假按键）-->
+      <!-- 上下文阈值（占位 · 假按键）-->
       <section class="settings-card">
-        <div class="settings-label">forge阈值 <i class="info-i" title="上下文阈值：保留多少 / 满多少触发">i</i></div>
-        <div class="forge-slider-wrap">
-          <input class="forge-slider" id="forgeSlider" type="range" min="0" max="100" value="40" aria-label="forge阈值">
-          <div class="forge-scale"><span>保留60k</span><span>满200k触发</span></div>
+        <div class="settings-label">上下文阈值 <i class="info-i" title="上下文阈值：保留多少 / 满多少触发">i</i></div>
+        <div class="context-slider-wrap">
+          <input class="context-slider" id="contextSlider" type="range" min="0" max="100" value="40" aria-label="上下文阈值">
+          <div class="context-scale"><span>保留60k</span><span>满200k触发</span></div>
         </div>
       </section>
 
@@ -1839,7 +2031,7 @@
       <button class="action-row hidden" id="resumeRow" type="button">
         <span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.7-5.7"/><path d="M18 3v4h-4"/><path d="M20 12a8 8 0 0 1-13.7 5.7"/><path d="M6 21v-4h4"/></svg></span>
         <span class="action-name">resume</span>
-        <span class="action-value">继续 pending forge</span>
+        <span class="action-value">继续 pending task</span>
         <span class="action-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
 
@@ -2060,10 +2252,14 @@ let lastStreamEventAt = 0;
 let backfillInFlight = false;
 const STREAM_STALE_MS = 45000;
 const BACKFILL_MS = 20000;
+const STREAM_FLUSH_MS = 80;
 let typingTimer = null;
 let typingActive = false;
 const freshKeys = new Set();   // 刚发/刚收到、待播一次入场动画的消息 key
 const freshReactionKeys = new Set();   // messages whose AI reaction just arrived, pending a one-shot pop
+const streamDrafts = new Map();        // stream_id+kind -> temporary bubble key
+const streamDeltaBuffers = new Map();  // stream_id+kind -> batched delta
+let streamFlushTimer = null;
 // messages you deleted locally (view only; never touches the server); persisted so refresh/backfill won't bring them back
 const deletedKeys = new Set();
 try{ (JSON.parse(localStorage.getItem("companion_deleted_ids") || "[]") || []).forEach((k) => deletedKeys.add(String(k))); }catch(_){}
@@ -2084,15 +2280,23 @@ const peerNameEl = $("#peerName"), profilePanel = $("#profilePanel");
 const profileClose = $("#profileClose"), moreBtn = $("#moreBtn");
 const profileAvatarBtn = $("#profileAvatarBtn"), profileNameEl = $("#profileName");
 const profileNameInput = $("#profileNameInput"), profileNameEdit = $("#profileNameEdit");
-const modelSeg = $("#modelSeg"), effortSeg = $("#effortSeg"), forgeSlider = $("#forgeSlider");
+const modelSeg = $("#modelSeg"), effortSeg = $("#effortSeg"), contextSlider = $("#contextSlider");
 const resetRow = $("#resetRow"), swapRow = $("#swapRow"), resumeRow = $("#resumeRow");
 const statusCopy = $("#statusCopy"), statusSidEl = $("#statusSid"), statusUsedEl = $("#statusUsed");
+const sessionBtn = $("#sessionBtn"), sessionPop = $("#sessionPop"), sessionList = $("#sessionList"), sessionNewBtn = $("#sessionNewBtn");
+const terminalBtn = $("#terminalBtn"), terminalPanel = $("#terminalPanel"), terminalBack = $("#terminalBack"), terminalLog = $("#terminalLog"), terminalForm = $("#terminalForm"), terminalInput = $("#terminalInput"), terminalSession = $("#terminalSession");
+const brainSeg = $("#brainSeg"), brainHint = $("#brainHint");
 
 /* ════════ 固定聊天背景 + 本地头像 ════════ */
 const THEMES = ["light","harbor"];
 const WALLS = { light: "chat-light.webp", harbor: "chat-harbor.webp" };
 const AVATAR_KEY = "companion_avatar";
 const REMARK_KEY = "companion_profile_remark";
+const SESSION_PICK_KEY = "companion_api_session_pick";
+const LEGACY_SESSION_ID = "__legacy__";
+const TERMINAL_WRAP = "[companion:pseudo-terminal]";
+let apiSessions = [];
+let activeApiSession = LEGACY_SESSION_ID;
 
 function currentTheme(){
   const t = document.documentElement.getAttribute("data-theme");
@@ -2174,7 +2378,7 @@ function openProfile(){
   profilePanel.classList.remove("hidden");
   // double rAF so the slide-in runs from the off-screen state
   requestAnimationFrame(() => requestAnimationFrame(() => profilePanel.classList.add("open")));
-  refreshForgeStatus();
+  refreshContextStatus();
 }
 function closeProfile(){
   if (!profilePanel) return;
@@ -2950,10 +3154,51 @@ function wireSegmented(seg, storeKey){
 wireSegmented(modelSeg, "companion_pick_model");
 wireSegmented(effortSeg, "companion_pick_effort");
 
-if (forgeSlider){
-  const savedForge = localStorage.getItem("companion_pick_forge");
-  if (savedForge !== null && savedForge !== "") forgeSlider.value = savedForge;
-  forgeSlider.addEventListener("input", () => { try{ localStorage.setItem("companion_pick_forge", forgeSlider.value); }catch(_){} });
+if (contextSlider){
+  const savedContext = localStorage.getItem("companion_pick_context");
+  if (savedContext !== null && savedContext !== "") contextSlider.value = savedContext;
+  contextSlider.addEventListener("input", () => { try{ localStorage.setItem("companion_pick_context", contextSlider.value); }catch(_){} });
+}
+
+function setBrainUi(target){
+  const t = target === "loop" ? "loop" : "desktop";
+  if (brainSeg) brainSeg.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.val === t));
+  if (brainHint) brainHint.textContent = t === "loop"
+    ? "现在由服务器 API loop 接消息"
+    : "现在由 Claude Code channel 接消息";
+}
+async function loadBrain(){
+  if (USE_MOCK || !secret){ setBrainUi("desktop"); return; }
+  try{
+    const r = await fetch(`${API_BASE}/app/brain`, { headers: authHeaders() });
+    if (!r.ok) throw new Error("brain " + r.status);
+    const d = await r.json();
+    setBrainUi(d.target || "desktop");
+  }catch(_){
+    setBrainUi("desktop");
+  }
+}
+async function saveBrain(target){
+  if (USE_MOCK){ setBrainUi(target); return; }
+  try{
+    const r = await fetch(`${API_BASE}/app/brain`, {
+      method:"POST",
+      headers:{ ...authHeaders(), "Content-Type":"application/json" },
+      body:JSON.stringify({ target })
+    });
+    if (!r.ok) throw new Error("brain " + r.status);
+    const d = await r.json();
+    setBrainUi(d.target || target);
+    showToast((d.target || target) === "loop" ? "已切到 API" : "已切到 Desktop");
+  }catch(_){
+    showToast("切换失败");
+  }
+}
+if (brainSeg){
+  brainSeg.addEventListener("click", e => {
+    const b = e.target.closest("button[data-val]");
+    if (b) saveBrain(b.dataset.val);
+  });
 }
 
 function shortSid(sid){
@@ -2965,20 +3210,20 @@ function formatK(n){
   if (!Number.isFinite(n) || n <= 0) return "0k";
   return Math.round(n / 1000) + "k";
 }
-let pendingForgeSid = "";
-function applyForgeStatus(s){
+let pendingContextSid = "";
+function applyContextStatus(s){
   if (!s || s.ok === false){
-    if (statusUsedEl) statusUsedEl.textContent = "forge status unknown";
+    if (statusUsedEl) statusUsedEl.textContent = "context status unknown";
     if (statusSidEl){ statusSidEl.textContent = "sid: (none)"; statusSidEl.dataset.sid = ""; }
-    pendingForgeSid = "";
+    pendingContextSid = "";
     if (resumeRow) resumeRow.classList.add("hidden");
     return;
   }
   const usage = Number(s.usage_tokens || 0);
   const threshold = String(s.threshold_k || "200k");
   const pending = s.pending && s.pending.new_sid;
-  pendingForgeSid = pending || "";
-  if (resumeRow) resumeRow.classList.toggle("hidden", !pendingForgeSid);
+  pendingContextSid = pending || "";
+  if (resumeRow) resumeRow.classList.toggle("hidden", !pendingContextSid);
   if (statusUsedEl){
     statusUsedEl.textContent = `${formatK(usage)} / ${threshold}${pending ? " · pending" : ""}`;
   }
@@ -2988,42 +3233,42 @@ function applyForgeStatus(s){
     statusSidEl.dataset.sid = sid;
   }
 }
-async function apiForgeStatus(){
-  // Placeholder: the open relay has no "forge" feature — return static demo numbers.
+async function apiContextStatus(){
+  // Placeholder: the open relay has no context-control feature — return static demo numbers.
   return { ok:true, usage_tokens:96000, threshold_k:"200k", active_sid:"demo-session" };
 }
-async function refreshForgeStatus(){
-  try{ applyForgeStatus(await apiForgeStatus()); }catch(_){}
+async function refreshContextStatus(){
+  try{ applyContextStatus(await apiContextStatus()); }catch(_){}
 }
-async function apiForgeAction(action, payload = {}){
-  // Placeholder: no forge backend in the open relay — these settings are demo-only.
+async function apiContextAction(action, payload = {}){
+  // Placeholder: no context-control backend in the open relay — these settings are demo-only.
   return { ok:true, command:{ action, payload } };
 }
 
 if (resetRow) resetRow.addEventListener("click", async () => {
   if (!window.confirm("确认 reset？这会开启一个全新窗口。")) return;
   try{
-    await apiForgeAction("reset");
-    showToast("reset 已送达 forge");
-    setTimeout(refreshForgeStatus, 1200);
+    await apiContextAction("reset");
+    showToast("reset 已记录");
+    setTimeout(refreshContextStatus, 1200);
   }catch(_){ showToast("reset 发送失败"); }
 });
 if (swapRow)  swapRow.addEventListener("click", async () => {
   if (!window.confirm("确认 swap？会保留尾部上下文并重启当前窗口。")) return;
   try{
-    await apiForgeAction("swap");
-    showToast("swap 已送达 forge");
-    setTimeout(refreshForgeStatus, 1200);
+    await apiContextAction("swap");
+    showToast("swap 已记录");
+    setTimeout(refreshContextStatus, 1200);
   }catch(_){ showToast("swap 发送失败"); }
 });
 if (resumeRow) resumeRow.addEventListener("click", async () => {
-  const sid = pendingForgeSid || (statusSidEl && statusSidEl.dataset.sid) || "";
-  if (!sid){ showToast("没有 pending forge"); return; }
-  if (!window.confirm("确认 resume pending forge？这会重启当前窗口。")) return;
+  const sid = pendingContextSid || (statusSidEl && statusSidEl.dataset.sid) || "";
+  if (!sid){ showToast("没有 pending task"); return; }
+  if (!window.confirm("确认 resume pending task？这会重启当前窗口。")) return;
   try{
-    await apiForgeAction("resume", { sid });
-    showToast("resume 已送达 forge");
-    setTimeout(refreshForgeStatus, 1200);
+    await apiContextAction("resume", { sid });
+    showToast("resume 已记录");
+    setTimeout(refreshContextStatus, 1200);
   }catch(_){ showToast("resume 发送失败"); }
 });
 
@@ -3131,6 +3376,144 @@ class MockEventSource{
 /* ════════════ API 层 ════════════ */
 function authHeaders(){ return { "Authorization": "Bearer " + secret }; }
 
+function activeSessionObj(){
+  return apiSessions.find((s) => s.id === activeApiSession) || null;
+}
+function effectiveApiSession(){
+  return activeApiSession && activeApiSession !== LEGACY_SESSION_ID ? activeApiSession : "";
+}
+function msgInActiveSession(m){
+  const meta = (m && m.meta) || {};
+  if (!activeApiSession || activeApiSession === LEGACY_SESSION_ID) return !meta.api_session;
+  return meta.api_session === activeApiSession;
+}
+function sessionFiltered(msgs){
+  return (msgs || []).filter(msgInActiveSession);
+}
+function renderSessionList(){
+  if (!sessionList) return;
+  const rows = [{ id:LEGACY_SESSION_ID, title:"旧主线 / Desktop 记录", since_id:0, virtual:true }].concat(apiSessions || []);
+  sessionList.innerHTML = rows.map((s) => {
+    const active = (s.id || "") === activeApiSession;
+    const meta = s.virtual ? "没有 api_session 标记的记录" : `since #${s.since_id || 0}`;
+    const rename = s.virtual ? "" : `<button class="session-rename" type="button" data-rename="${escapeHtml(s.id || "")}" aria-label="改名" title="改名">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+    </button>`;
+    return `<div class="session-item${active ? " active" : ""}" data-session="${escapeHtml(s.id || "")}" role="button" tabindex="0">
+      <span class="session-main">
+        <span class="session-name">${escapeHtml(s.title || "新对话")}</span>
+        <span class="session-meta">${escapeHtml(meta)}</span>
+      </span>
+      ${rename}
+    </div>`;
+  }).join("");
+}
+function setSessionPopover(open){
+  if (sessionPop) sessionPop.hidden = !open;
+}
+async function loadSessions(){
+  if (USE_MOCK || !secret){ activeApiSession = LEGACY_SESSION_ID; renderSessionList(); return; }
+  try{
+    const r = await fetch(`${API_BASE}/app/sessions`, { headers: authHeaders() });
+    if (!r.ok) throw new Error("sessions " + r.status);
+    const d = await r.json();
+    apiSessions = Array.isArray(d.sessions) ? d.sessions : [];
+    const saved = (() => { try{ return localStorage.getItem(SESSION_PICK_KEY) || ""; }catch(_){ return ""; } })();
+    const ids = new Set(apiSessions.map((s) => s.id));
+    activeApiSession = (saved === LEGACY_SESSION_ID || ids.has(saved)) ? saved : (d.active_session || LEGACY_SESSION_ID);
+  }catch(_){
+    apiSessions = [];
+    activeApiSession = LEGACY_SESSION_ID;
+  }
+  renderSessionList();
+}
+async function activateSession(sessionId, { reload = true } = {}){
+  activeApiSession = sessionId || LEGACY_SESSION_ID;
+  try{ localStorage.setItem(SESSION_PICK_KEY, activeApiSession); }catch(_){}
+  resetServerHistoryCache();
+  renderSessionList();
+  setSessionPopover(false);
+  const sid = effectiveApiSession();
+  if (sid){
+    try{
+      await fetch(`${API_BASE}/app/sessions/${encodeURIComponent(sid)}`, {
+        method:"PATCH",
+        headers:{ ...authHeaders(), "Content-Type":"application/json" },
+        body:JSON.stringify({ active:true })
+      });
+    }catch(_){}
+  }
+  if (reload){
+    const msgs = await apiLatestHistory();
+    startChat(msgs);
+  }
+}
+async function createNewSession(){
+  try{
+    const r = await fetch(`${API_BASE}/app/sessions`, {
+      method:"POST",
+      headers:{ ...authHeaders(), "Content-Type":"application/json" },
+      body:JSON.stringify({ title:"新对话", activate:true })
+    });
+    if (!r.ok) throw new Error("sessions " + r.status);
+    const d = await r.json();
+    apiSessions = Array.isArray(d.sessions) ? d.sessions : [];
+    activeApiSession = d.active_session || (d.created && d.created.id) || LEGACY_SESSION_ID;
+    try{ localStorage.setItem(SESSION_PICK_KEY, activeApiSession); }catch(_){}
+    resetServerHistoryCache();
+    renderSessionList();
+    setSessionPopover(false);
+    startChat([]);
+    showToast("已开启新 API 窗口");
+  }catch(_){
+    showToast("新对话失败");
+  }
+}
+async function renameSession(sessionId){
+  const item = apiSessions.find((s) => s.id === sessionId);
+  if (!item) return;
+  const next = prompt("给这个窗口起个名字", item.title || "新对话");
+  if (next == null) return;
+  const title = next.trim();
+  if (!title) return;
+  try{
+    const r = await fetch(`${API_BASE}/app/sessions/${encodeURIComponent(sessionId)}`, {
+      method:"PATCH",
+      headers:{ ...authHeaders(), "Content-Type":"application/json" },
+      body:JSON.stringify({ title })
+    });
+    if (!r.ok) throw new Error("rename " + r.status);
+    const d = await r.json();
+    apiSessions = Array.isArray(d.sessions) ? d.sessions : apiSessions.map((s) => s.id === sessionId ? { ...s, title } : s);
+    renderSessionList();
+    showToast("窗口已改名");
+  }catch(_){
+    showToast("改名失败");
+  }
+}
+if (sessionBtn) sessionBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  renderSessionList();
+  setSessionPopover(sessionPop ? sessionPop.hidden : false);
+});
+if (sessionNewBtn) sessionNewBtn.addEventListener("click", createNewSession);
+if (sessionList) sessionList.addEventListener("click", (e) => {
+  const renameBtn = e.target.closest("button[data-rename]");
+  if (renameBtn){
+    e.preventDefault();
+    e.stopPropagation();
+    renameSession(renameBtn.dataset.rename || "");
+    return;
+  }
+  const row = e.target.closest("[data-session]");
+  if (row) activateSession(row.dataset.session || "");
+});
+document.addEventListener("click", (e) => {
+  if (!sessionPop || sessionPop.hidden) return;
+  if (sessionPop.contains(e.target) || (sessionBtn && sessionBtn.contains(e.target))) return;
+  setSessionPopover(false);
+});
+
 const HISTORY_FETCH_LIMIT = 500;
 let serverHistoryCache = [];
 let serverHistoryComplete = false;
@@ -3157,6 +3540,7 @@ async function apiHistory({ since = 0, beforeId = null, latest = false, limit = 
   if (USE_MOCK) return Mock.history({ since, beforeId, latest, limit });
   ensureServerHistoryCache();
   const params = new URLSearchParams({ since: String(since || 0), limit: String(limit) });
+  if (activeApiSession) params.set("session_id", activeApiSession);
   const r = await fetch(`${API_BASE}/app/history?${params.toString()}`, { headers: authHeaders() });
   if (r.status === 401){ handle401(); throw new Error("401"); }
   if (!r.ok) throw new Error("history " + r.status);
@@ -3186,11 +3570,11 @@ async function loadCompleteServerHistory(){
 async function apiLatestHistory(limit = HISTORY_PAGE_SIZE){
   if (USE_MOCK) return apiHistory({ latest:true, limit });
   const all = await loadCompleteServerHistory();
-  return all.slice(-limit);
+  return sessionFiltered(all).slice(-limit);
 }
 async function apiOlderHistory(beforeId, limit = HISTORY_PAGE_SIZE){
   const all = await loadCompleteServerHistory();
-  return all.filter((m) => msgNum(m.id) < msgNum(beforeId)).slice(-limit);
+  return sessionFiltered(all).filter((m) => msgNum(m.id) < msgNum(beforeId)).slice(-limit);
 }
 async function apiNewerHistory(since, limit = 200){
   if (USE_MOCK) return apiHistory({ since, limit });
@@ -3204,12 +3588,14 @@ async function apiNewerHistory(since, limit = 200){
     if (maxId <= cursor || batch.length < HISTORY_FETCH_LIMIT) break;
     cursor = maxId;
   }
-  return rows;
+  return sessionFiltered(rows);
 }
 
 async function apiSend(text, attachments){
   if (USE_MOCK) return Mock.send(text);
   const payload = { text: text || "" };
+  const sid = effectiveApiSession();
+  if (sid) payload.api_session = sid;
   if (attachments && attachments.length) payload.attachments = attachments;
   const r = await fetch(`${API_BASE}/app/send`, {
     method: "POST",
@@ -3365,7 +3751,7 @@ function openStream(){
   let vapidKey = null;
   async function getKey(){
     if (vapidKey) return vapidKey;
-    const r = await fetch(`${API_BASE}/app/vapid_public`);
+    const r = await fetch(`${API_BASE}/app/vapid_public`, { headers: authHeaders() });
     if (!r.ok) throw new Error("vapid " + r.status);
     vapidKey = (await r.json()).key;
     if (!vapidKey) throw new Error("服务器没配公钥");
@@ -3602,6 +3988,161 @@ function sortId(m){
 function sortedMessages(){
   return chatMessages.slice().sort((a, b) => (sortId(a) - sortId(b)) || (a._order - b._order));
 }
+function stripInlineThinkingText(text){
+  let s = String(text || "");
+  s = s.replace(/<thinking>[\s\S]*?<\/thinking>/gi, "\n");
+  s = s.replace(/<think>[\s\S]*?<\/think>/gi, "\n");
+  s = s.replace(/<(?:thinking|think)>[\s\S]*$/i, "");
+  s = s.replace(/<\/?(?:thinking|think)>/gi, "");
+  return s.trim();
+}
+function terminalVisibleText(m){
+  const raw = String((m && m.text) || "");
+  if (raw.startsWith(TERMINAL_WRAP)){
+    const mm = raw.match(/^\[companion:pseudo-terminal\]\s*\ncommand:\s*([^\n]*)/);
+    return mm && mm[1] ? `$ ${mm[1].trim()}` : "$";
+  }
+  if (m && m.from === "ai" && m.kind === "reply"){
+    return stripInlineThinkingText(raw) || "(empty reply)";
+  }
+  return raw;
+}
+let terminalRenderQueued = false;
+let terminalRenderTimer = null;
+function terminalIsOpen(){
+  return !!(terminalPanel && terminalPanel.classList.contains("open"));
+}
+function terminalAtBottom(){
+  if (!terminalLog) return true;
+  return terminalLog.scrollHeight - terminalLog.scrollTop - terminalLog.clientHeight < 80;
+}
+function terminalStepResultHtml(result){
+  if (result == null || result === "") return "";
+  if (typeof result === "object"){
+    const out = [];
+    if (result.stdout) out.push(`<span>${renderText(result.stdout)}</span>`);
+    if (result.stderr) out.push(`<span class="term-err">${renderText(result.stderr)}</span>`);
+    if (result.exit_code != null || result.code != null) out.push(`<span class="term-muted">[exit ${escapeHtml(String(result.exit_code != null ? result.exit_code : result.code))}]</span>`);
+    if (out.length) return out.join("\n");
+    return renderText(JSON.stringify(result, null, 2));
+  }
+  const raw = String(result || "");
+  try{
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") return terminalStepResultHtml(parsed);
+  }catch(_){}
+  return renderText(raw);
+}
+function terminalActHtml(m){
+  const meta = m.meta || {};
+  const a = (meta.act && typeof meta.act === "object") ? meta.act : meta;
+  const rawSteps = Array.isArray(a.steps) ? a.steps : [];
+  const steps = rawSteps.length ? rawSteps : ((a.tool || a.cmd || a.result) ? [a] : []);
+  if (!steps.length) return renderText(terminalVisibleText(m) || "# tool use");
+  return steps.map((s) => {
+    if (!s || typeof s !== "object") return "";
+    const tool = s.tool || s.name || "";
+    const cmd = s.cmd || s.command || "";
+    const result = terminalStepResultHtml(s.result || s.output || s.stdout || "");
+    const head = [
+      tool ? `<span class="term-muted"># ${escapeHtml(String(tool))}</span>` : "",
+      cmd ? `<span class="term-cmd">$ ${escapeHtml(String(cmd))}</span>` : ""
+    ].filter(Boolean).join("\n");
+    return [head, result].filter(Boolean).join("\n");
+  }).filter(Boolean).join("\n");
+}
+function terminalMessageHtml(m){
+  if (!m || m.kind === "thinking") return "";
+  if (m.kind === "act") return `<div class="term-entry term-tool">${terminalActHtml(m)}</div>`;
+  const text = terminalVisibleText(m);
+  if (!text && !(m.meta && Array.isArray(m.meta.attachments) && m.meta.attachments.length)) return "";
+  let body = text ? renderText(text) : "";
+  const atts = (m.meta && Array.isArray(m.meta.attachments)) ? m.meta.attachments : [];
+  if (atts.length){
+    body += (body ? "\n" : "") + atts.map((a) => `[${a.kind || "file"}] ${a.name || a.url || "attachment"}`).join("\n");
+  }
+  if (m.from === "human") return `<div class="term-entry term-user">&gt; ${body}</div>`;
+  return `<div class="term-entry term-assistant">${body}</div>`;
+}
+function renderTerminal({ stickToBottom = false } = {}){
+  if (!terminalLog) return;
+  const stick = stickToBottom || terminalAtBottom();
+  const html = sortedMessages().filter(msgInActiveSession).map(terminalMessageHtml).filter(Boolean).join("");
+  terminalLog.innerHTML = html || `<div class="term-entry term-muted"># no messages in this window yet</div>`;
+  if (terminalSession){
+    const s = activeSessionObj();
+    terminalSession.textContent = s ? `${s.title || s.id} · same conversation stream` : "旧主线 / Desktop 记录 · same conversation stream";
+  }
+  if (stick) terminalLog.scrollTop = terminalLog.scrollHeight;
+}
+function scheduleTerminalRender({ stickToBottom = false } = {}){
+  if (!terminalIsOpen()) return;
+  if (terminalRenderQueued){
+    if (stickToBottom) scheduleTerminalRender._stick = true;
+    return;
+  }
+  scheduleTerminalRender._stick = !!stickToBottom;
+  terminalRenderQueued = true;
+  terminalRenderTimer = setTimeout(() => {
+    terminalRenderTimer = null;
+    terminalRenderQueued = false;
+    const stick = !!scheduleTerminalRender._stick;
+    scheduleTerminalRender._stick = false;
+    renderTerminal({ stickToBottom: stick });
+  }, 120);
+}
+function setTerminalOpen(open){
+  if (!terminalPanel) return;
+  terminalPanel.classList.toggle("open", open);
+  terminalPanel.setAttribute("aria-hidden", String(!open));
+  if (terminalBtn) terminalBtn.classList.toggle("active", open);
+  if (open){
+    renderTerminal({ stickToBottom:true });
+    setTimeout(() => { try{ terminalInput && terminalInput.focus({ preventScroll:true }); }catch(_){ terminalInput && terminalInput.focus(); } }, 40);
+  }
+}
+async function terminalSend(){
+  if (!terminalInput) return;
+  const text = terminalInput.value.trim();
+  if (!text) return;
+  terminalInput.value = "";
+  terminalInput.style.height = "auto";
+  const payload = `${TERMINAL_WRAP}\ncommand: ${text}\n\nTreat this as a command typed into the pseudo terminal. If tool access is available, run it safely and reply with concise stdout/stderr/exit code.`;
+  const optimisticTs = Date.now();
+  const tempKey = "pending-terminal-" + (++optimisticSeq);
+  const sid = effectiveApiSession();
+  const optimisticMeta = sid ? { api_session: sid } : {};
+  const optimistic = { id: tempKey, ts: new Date(optimisticTs).toISOString(), from:"human", kind:"user", text:payload, meta:optimisticMeta, status:"sending" };
+  seen.add(tempKey);
+  setMessage(optimistic, { render:false, cache:false });
+  rememberPendingOutgoing(tempKey, payload, optimisticTs);
+  scheduleRender({ stickToBottom:true });
+  scheduleTerminalRender({ stickToBottom:true });
+  try{
+    const { id } = await apiSend(payload);
+    confirmOptimistic(tempKey, msgKey(id));
+    dropPendingOutgoing(tempKey);
+  }catch(err){
+    dropPendingOutgoing(tempKey);
+    if (String(err.message) === "401") return;
+    setMessage({ ...optimistic, status:"failed" });
+  }
+}
+if (terminalBtn) terminalBtn.addEventListener("click", () => setTerminalOpen(true));
+if (terminalBack) terminalBack.addEventListener("click", () => setTerminalOpen(false));
+if (terminalForm) terminalForm.addEventListener("submit", (e) => { e.preventDefault(); terminalSend(); });
+if (terminalInput){
+  terminalInput.addEventListener("input", () => {
+    terminalInput.style.height = "auto";
+    terminalInput.style.height = Math.min(terminalInput.scrollHeight, 120) + "px";
+  });
+  terminalInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      terminalSend();
+    }
+  });
+}
 function invalidateRows(){
   rowsDirty = true;
   prefixSumsDirty = true;
@@ -3636,12 +4177,16 @@ function resetChatState(){
   hasMoreOlder = true;
   openThinkKeys.clear();
   openActKeys.clear();
+  streamDrafts.clear();
+  streamDeltaBuffers.clear();
+  if (streamFlushTimer){ clearTimeout(streamFlushTimer); streamFlushTimer = null; }
+  if (terminalRenderTimer){ clearTimeout(terminalRenderTimer); terminalRenderTimer = null; terminalRenderQueued = false; }
   freshKeys.clear();
   hideNewMsgPill();
 }
 function setMessage(raw, { render = true, cache = true } = {}){
   const key = msgKey(raw.id);
-  if (deletedKeys.has(key)) return undefined;   // 安已在本地删除 → 任何来源(history/SSE/缓存)都不再收进来
+  if (deletedKeys.has(key)) return undefined;   // 用户已在本地删除 → 任何来源(history/SSE/缓存)都不再收进来
   const existing = messageByKey.get(key);
   if (existing){
     Object.assign(existing, raw, { id: raw.id, meta: raw.meta || existing.meta || {}, _key: key });
@@ -3655,6 +4200,7 @@ function setMessage(raw, { render = true, cache = true } = {}){
   if (idNum > lastId) lastId = idNum;
   if (render) scheduleRender({ stickToBottom: nearBottom() });
   if (cache) scheduleCacheSave();
+  scheduleTerminalRender();
   return messageByKey.get(key);
 }
 function removeMessage(key, { render = true, cache = true } = {}){
@@ -3666,6 +4212,7 @@ function removeMessage(key, { render = true, cache = true } = {}){
   seen.delete(k);
   invalidateRows();
   if (render) scheduleRender({ preserveAnchor: true });
+  scheduleTerminalRender();
   if (cache) scheduleCacheSave();
   return m;
 }
@@ -3706,6 +4253,7 @@ function mergeHistoryMessages(msgs, { stickToBottom = false } = {}){
       added = true;
       return;
     }
+    removeStreamDraftForMessage(m, { render:false });
     seen.add(key);
     setMessage({ ...m, status:"sent" }, { render:false });
     added = true;
@@ -4300,7 +4848,7 @@ function rememberPendingOutgoing(tempKey, text, ts){
   pendingOutgoing.push({ tempKey, text, ts, claimed:false });
   prunePendingOutgoing();
 }
-function forgetPendingOutgoing(tempKey){
+function dropPendingOutgoing(tempKey){
   for (let i = pendingOutgoing.length - 1; i >= 0; i--){
     if (pendingOutgoing[i].tempKey === tempKey) pendingOutgoing.splice(i, 1);
   }
@@ -4322,6 +4870,112 @@ function claimPendingOutgoing(m, key){
   return true;
 }
 
+function streamDraftKey(streamId, kind){
+  return `stream:${kind}:${streamId}`;
+}
+function streamMapKey(streamId, kind){
+  return `${kind}:${streamId}`;
+}
+function streamKindFromEvent(ev){
+  return ev.type === "thinking_delta" ? "thinking" : (ev.type === "reply_delta" ? "reply" : "");
+}
+function appendStreamText(current, addition){
+  const base = String(current || "");
+  const chunk = String(addition || "");
+  if (!chunk) return base;
+  if (!base) return chunk;
+  if (chunk.startsWith(base)) return chunk;
+  if (base.endsWith(chunk)) return base;
+  const max = Math.min(base.length, chunk.length);
+  for (let n = max; n > 0; n--){
+    if (base.slice(-n) === chunk.slice(0, n)) return base + chunk.slice(n);
+  }
+  return base + chunk;
+}
+function flushStreamDeltas(filterKey = ""){
+  if (streamFlushTimer){ clearTimeout(streamFlushTimer); streamFlushTimer = null; }
+  Array.from(streamDeltaBuffers.entries()).forEach(([key, ev]) => {
+    if (filterKey && key !== filterKey) return;
+    streamDeltaBuffers.delete(key);
+    applyStreamDelta(ev);
+  });
+}
+function scheduleStreamFlush(){
+  if (streamFlushTimer) return;
+  streamFlushTimer = setTimeout(() => flushStreamDeltas(), STREAM_FLUSH_MS);
+}
+function queueStreamDelta(ev){
+  const kind = streamKindFromEvent(ev);
+  const streamId = String(ev.stream_id || "");
+  if (!kind || !streamId) return;
+  const key = streamMapKey(streamId, kind);
+  if (ev.done){
+    flushStreamDeltas(key);
+    applyStreamDelta(ev);
+    return;
+  }
+  const existing = streamDeltaBuffers.get(key);
+  if (existing){
+    existing.text = appendStreamText(existing.text, ev.text);
+    existing.ts = existing.ts || ev.ts;
+    existing.api_session = existing.api_session || ev.api_session;
+    if (ev.api && typeof ev.api === "object") existing.api = ev.api;
+  }else{
+    streamDeltaBuffers.set(key, { ...ev, text:String(ev.text || "") });
+  }
+  scheduleStreamFlush();
+}
+function removeStreamDraftForMessage(m, opts = {}){
+  const meta = (m && m.meta) || {};
+  const sid = String(meta.stream_id || "");
+  if (!sid || (m.kind !== "thinking" && m.kind !== "reply")) return false;
+  const mapKey = streamMapKey(sid, m.kind);
+  streamDeltaBuffers.delete(mapKey);
+  const draftKey = streamDrafts.get(mapKey) || streamDraftKey(sid, m.kind);
+  streamDrafts.delete(mapKey);
+  return !!removeMessage(draftKey, { render: opts.render !== false, cache:false });
+}
+function applyStreamDelta(ev){
+  const kind = streamKindFromEvent(ev);
+  const streamId = String(ev.stream_id || "");
+  if (!kind || !streamId) return;
+  const meta = { stream_id: streamId, streaming:true };
+  if (ev.api_session) meta.api_session = ev.api_session;
+  if (ev.api && typeof ev.api === "object") meta.api = ev.api;
+  if (!msgInActiveSession({ meta })) return;
+
+  const mapKey = streamMapKey(streamId, kind);
+  const key = streamDrafts.get(mapKey) || streamDraftKey(streamId, kind);
+  const existing = messageByKey.get(key);
+  if (ev.done){
+    if (existing) removeMessage(key, { render:true, cache:false });
+    streamDrafts.delete(mapKey);
+    return;
+  }
+
+  const text = appendStreamText(existing ? existing.text : "", ev.text);
+  if (!text) return;
+  const stick = nearBottom();
+  if (!existing){
+    streamDrafts.set(mapKey, key);
+    if (kind === "thinking") openThinkKeys.add(key);
+    if (stick && kind === "reply") freshKeys.add(key);
+  }
+  hideTyping();
+  setMessage({
+    id:key,
+    ts:ev.ts || (existing && existing.ts) || new Date().toISOString(),
+    from:"ai",
+    kind,
+    text,
+    meta,
+    status:"streaming",
+  }, { render:false, cache:false });
+  scheduleRender({ stickToBottom: stick });
+  scheduleTerminalRender({ stickToBottom: stick });
+  if (!stick && kind === "reply") showNewMsgPill();
+}
+
 function showTyping(){
   typingActive = true;
   renderStatus();
@@ -4338,16 +4992,20 @@ function hideTyping(){
 
 function onMessage(m){
   if (m.type === "ping") return;
+  if (m.type === "thinking_delta" || m.type === "reply_delta"){
+    queueStreamDelta(m);
+    return;
+  }
   if (m.type === "typing"){
     if (m.active) showTyping(); else hideTyping();
     return;
   }
-  if (m.type === "forge_status"){
-    applyForgeStatus(m.status);
+  if (m.type === "context_status"){
+    applyContextStatus(m.status);
     return;
   }
-  if (m.type === "forge_command"){
-    showToast("forge 指令已排队");
+  if (m.type === "context_command"){
+    showToast("上下文指令已排队");
     return;
   }
   if (m.type === "reaction"){            // the AI reacted to a message → patch its meta.reactions
@@ -4356,6 +5014,7 @@ function onMessage(m){
     return;
   }
   if (m.from === "ai" && m.kind === "call"){
+    if (!msgInActiveSession(m)) return;
     const callStick = nearBottom();
     if (window.VoiceCall) window.VoiceCall.incoming(m.text || (AI_NAME + "想和你语音通话。"));
     setMessage({ ...m, status:"sent" }, { render:false });
@@ -4363,6 +5022,8 @@ function onMessage(m){
     if (!callStick) showNewMsgPill();
     return;
   }
+  if (!msgInActiveSession(m)) return;
+  removeStreamDraftForMessage(m, { render:false });
   if (m.from === "ai") hideTyping();
   const key = msgKey(m.id);
   const stick = nearBottom();
@@ -4761,7 +5422,9 @@ async function doSend(){
 
   const optimisticTs = Date.now();
   const tempKey = "pending-" + (++optimisticSeq);
-  const optimistic = { id: tempKey, ts: new Date(optimisticTs).toISOString(), from:"human", kind:"user", text, meta:{}, status:"sending" };
+  const currentSid = effectiveApiSession();
+  const optimisticMeta = currentSid ? { api_session: currentSid } : {};
+  const optimistic = { id: tempKey, ts: new Date(optimisticTs).toISOString(), from:"human", kind:"user", text, meta:optimisticMeta, status:"sending" };
   seen.add(tempKey);
   setMessage(optimistic, { render:false, cache:false });
   freshKeys.add(tempKey);        // 入场弹一下
@@ -4773,9 +5436,9 @@ async function doSend(){
     const { id } = await apiSend(text);
     const key = msgKey(id);
     confirmOptimistic(tempKey, key);
-    forgetPendingOutgoing(tempKey);
+    dropPendingOutgoing(tempKey);
   }catch(err){
-    forgetPendingOutgoing(tempKey);
+    dropPendingOutgoing(tempKey);
     if (String(err.message) === "401") return;
     setMessage({ ...optimistic, status:"failed" });
   }
@@ -4831,7 +5494,10 @@ async function sendOneFile(file){
   const optimisticTs = Date.now();
   const tempKey = "pending-" + (++optimisticSeq);
   const att0 = { url: "", localUrl: localUrl, name: name, size: blob.size, mime: mime, kind: kind, width: imgW, height: imgH, uploading: true };
-  const optimistic = { id: tempKey, ts: new Date(optimisticTs).toISOString(), from: "human", kind: "user", text: "", meta: { attachments: [att0] }, status: "sending" };
+  const currentSid = effectiveApiSession();
+  const optimisticMeta = { attachments: [att0] };
+  if (currentSid) optimisticMeta.api_session = currentSid;
+  const optimistic = { id: tempKey, ts: new Date(optimisticTs).toISOString(), from: "human", kind: "user", text: "", meta: optimisticMeta, status: "sending" };
   seen.add(tempKey);
   setMessage(optimistic, { render: false, cache: false });
   freshKeys.add(tempKey);
@@ -4843,10 +5509,12 @@ async function sendOneFile(file){
     const finalAtt = { url: up.url, name: up.name, size: up.size, mime: up.mime, kind: up.kind, width: imgW, height: imgH };
     rememberPendingOutgoing(tempKey, "", optimisticTs);
     const { id } = await apiSend("", [finalAtt]);
-    confirmOptimistic(tempKey, msgKey(id), { id: id, ts: optimistic.ts, from: "human", kind: "user", text: "", meta: { attachments: [finalAtt] }, status: "sent" });
-    forgetPendingOutgoing(tempKey);
+    const finalMeta = { attachments: [finalAtt] };
+    if (currentSid) finalMeta.api_session = currentSid;
+    confirmOptimistic(tempKey, msgKey(id), { id: id, ts: optimistic.ts, from: "human", kind: "user", text: "", meta: finalMeta, status: "sent" });
+    dropPendingOutgoing(tempKey);
   }catch(err){
-    forgetPendingOutgoing(tempKey);
+    dropPendingOutgoing(tempKey);
     if (String(err.message) === "401") return;
     if (String(err.message) === "413") showToast("文件太大（上限 10MB）");
     setMessage({ ...optimistic, meta: { attachments: [{ ...att0, uploading: false, failed: true }] }, status: "failed" });
@@ -4887,6 +5555,8 @@ $("#loginForm").addEventListener("submit", async (e) => {
   secret = val;
   try{
     // 用 history 验证密钥(401 会抛错)
+    await loadSessions();
+    loadBrain();
     const msgs = await apiLatestHistory();
     localStorage.setItem(LS_KEY, secret);
     startChat(msgs);
@@ -4942,15 +5612,17 @@ function startChat(initialMsgs, { connect = true, fromCache = false } = {}){
   renderVirtualList({ stickToBottom:true });
   if (!fromCache) scheduleCacheSave();
   if (connect) startRealtime();
-  refreshForgeStatus();
+  refreshContextStatus();
 }
 
 async function init(){
   if (!secret){ showLogin(); return; }
+  await loadSessions();
+  loadBrain();
   let showedCache = false;
   const cached = await readCachedMessages();
   if (cached.length){
-    startChat(cached, { connect:false, fromCache:true });
+    startChat(sessionFiltered(cached), { connect:false, fromCache:true });
     showedCache = true;
   }
   try{
@@ -4972,7 +5644,7 @@ async function init(){
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible" || !secret) return;
   backfill();
-  refreshForgeStatus();
+  refreshContextStatus();
   if (!es || es.readyState !== 1 || Date.now() - lastStreamEventAt > STREAM_STALE_MS) openStream();
 });
 

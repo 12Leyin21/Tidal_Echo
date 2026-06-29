@@ -182,13 +182,13 @@ curl -s -X POST https://your-domain.example/relay/app/push_test \
 
 ## 5. 本地 AI 侧怎么接（简述）
 
-AI 侧 = 你电脑上的 Claude Code 加一个 **channel 插件**，它：
+AI 侧默认是你电脑上的 Claude Code 加一个 **channel 插件**，它：
 - 长连 `GET /relay/channel/in?token=SECRET`（SSE），收到你发的消息就投喂给 Claude；
 - Claude 要回复时，插件 `POST /relay/channel/out`：
   - 普通回复：`{"type":"reply","text":"..."}`
   - 戳一戳：`{"type":"react","id":<目标消息id>,"emoji":"❤️"}`（空 emoji = 撤回这一戳）
 
-> 插件本体 + 前端 PWA 会**随后单独给你**（这份文档先把后端跑起来）。协议很薄，上面这两个端点就是全部。
+不用 Claude Code 时，跳过 `channel/`，直接跑 `examples/bridge_any_llm.py` 接任意 OpenAI-compatible API；想在 VPS 上常驻 API 身体，则用 `examples/api_loop.py` 并通过 `/app/brain` 切到 `loop`。完整决策树见仓库根的 `AGENTS.md` 和 `examples/README.md`。
 
 ---
 
@@ -196,7 +196,7 @@ AI 侧 = 你电脑上的 Claude Code 加一个 **channel 插件**，它：
 
 | 功能 | 为什么砍 | 想加回来 |
 |---|---|---|
-| forge 上下文切换控制 | 依赖一套私有的本地 daemon | 是个通用命令队列，可按需自建 |
+| 私有上下文切换控制 | 依赖原系统的本地 daemon | 是个通用命令队列，可按需自建 |
 | 昨日时间线摘要注入 | 依赖私有记忆库 + 自配的小模型路由 | 接你自己的 LLM 路由即可 |
 | 抱抱垫 hug 事件 | 依赖 ESP32 硬件 | 有硬件再加一个端点 |
 | 体感 sense 上报 | 喂给私有调度心跳 | 同上 |

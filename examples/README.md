@@ -5,7 +5,9 @@
 | 文件 | 干什么 | 平台 |
 |---|---|---|
 | [`bridge_any_llm.py`](bridge_any_llm.py) | 把任意 OpenAI 兼容模型(GPT/DeepSeek/Gemini/GLM/Kimi/通义/本地…)接成 AI 侧 | 任意 |
-| [`.env.example`](.env.example) | `bridge_any_llm.py` 的配置模板 | — |
+| [`api_loop.py`](api_loop.py) | 服务器常驻 API 身体；配合 PWA 的 Desktop/API 开关、多窗口和流式输出 | Linux/VPS |
+| [`companion-api-loop.service`](companion-api-loop.service) | `api_loop.py` 的 systemd 模板 | Linux/VPS |
+| [`.env.example`](.env.example) | `bridge_any_llm.py` / `api_loop.py` 共用配置模板 | — |
 | [`confirm_dev_channel_win.py`](confirm_dev_channel_win.py) | Windows 上自动确认 Claude Code 的 DevChannelsDialog 弹框 | Windows |
 
 ---
@@ -33,6 +35,36 @@ python3 bridge_any_llm.py
 
 ---
 
+## 服务器 API 身体(api_loop.py)
+
+它不是长连消费 `/channel/in`，而是一个本机 HTTP 服务：relay 的 `/app/brain` 切到
+`loop` 后，`/app/send` 会把新消息 POST 到 `/loop/ingest`。它支持：
+
+- OpenAI-compatible 模型链和 fallback。
+- 读取 relay.db 里的同窗口近期上文。
+- PWA 多窗口 `api_session`。
+- `reply_delta` 流式草稿，完成后落正式 `reply`。
+
+```bash
+cd examples
+cp .env.example .env
+# 填 RELAY_URL / RELAY_SECRET / RELAY_DB / LLM_API_BASE / LLM_API_KEY / LLM_MODEL
+python3 api_loop.py
+```
+
+把 relay 切到它：
+
+```bash
+curl -s -X POST http://127.0.0.1:3011/app/brain \
+  -H "Authorization: Bearer $RELAY_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"target":"loop"}'
+```
+
+要常驻就参考 [`companion-api-loop.service`](companion-api-loop.service)。
+
+---
+
 ## Claude Code 的确认框自动过(无人值守)
 
 只有走 Claude Code 这条路才有这个框。**Linux/macOS 用 tmux 最干净:**
@@ -55,4 +87,5 @@ python confirm_dev_channel_win.py -- claude --dangerously-load-development-chann
 ## ⚠️ 单身体原则
 
 relay 是单用户单通道。**同一时刻只跑一个 AI 侧** —— 别同时开着 Claude Code channel
-和这个 bridge,否则两个都回复,用户看到双重消息。换大脑时先停旧的再起新的。
+和 `bridge_any_llm.py`。`api_loop.py` 由 relay 的 Desktop/API 开关控流，切到 `loop`
+时 Desktop channel 不会收到新消息；切回 `desktop` 时 API loop 仍可运行但不会接新入站。

@@ -88,7 +88,7 @@ claude --dangerously-load-development-channels server:companion
 
 ## 7. 和原系统的差异（这版砍掉了什么）
 
-为匹配"核心聊天通道"版后端，这份插件**移除了**原系统里的 forge 上下文控制、silent inject、audio_sense 实时音频转发等强耦合逻辑——那些都对应后端已经不存在的端点。留下的是纯粹的收发 + 附件 + 戳一戳。需要时照着现有 `relayPost('/channel/out', …)` 的风格再加即可。
+为匹配"核心聊天通道"版后端，这份插件**移除了**原系统里的私有上下文控制、silent inject、audio_sense 实时音频转发等强耦合逻辑——那些都对应后端已经不存在的端点。留下的是纯粹的收发 + 附件 + 戳一戳。需要时照着现有 `relayPost('/channel/out', …)` 的风格再加即可。
 
 ## 8. 安全
 
