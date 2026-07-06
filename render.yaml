@@ -23,5 +23,4 @@ services:
   - type: web
     name: tidal-echo-web
     env: static
-    plan: free
     staticPublishPath: web
