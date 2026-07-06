@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: tidal-echo-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --app-dir backend
+    envVars:
+      - key: RELAY_SECRET
+        sync: false          # set in Render dashboard > Environment
+      - key: RELAY_AI_NAME
+        value: 盛沐
+      - key: RELAY_HUMAN_NAME
+        value: 灵兮
+      - key: RELAY_PUBLIC_PREFIX
+        value: ""
+      - key: RELAY_APP_PATH
+        value: https://tidal-echo-web.onrender.com/
+      - key: RELAY_ALLOW_ORIGINS
+        value: https://tidal-echo-web.onrender.com
+
+  - type: web
+    name: tidal-echo-web
+    env: static
+    plan: free
+    staticPublishPath: web
