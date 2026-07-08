@@ -832,6 +832,8 @@ async def app_tts(request: Request):
 # ---------------------------------------------------------------------------
 
 _last_seen_ts = None
+_last_phone_activity: dict | None = None
+_last_weather: dict | None = None
 
 
 def _presence_state(now):
@@ -854,6 +856,45 @@ def latest_message():
     if not row:
         return None
     return rows_to_messages([row])[0]
+
+
+@app.post("/phone/activity")
+async def phone_activity(request: Request):
+    """iOS Shortcuts POST here when the user opens a target app. Logs {app, event, ts}."""
+    check_auth(request)
+    global _last_phone_activity
+    body = await request.json()
+    app_name = (body.get("app") or "").strip()
+    event = (body.get("event") or "open").strip()
+    ts = body.get("ts") or now_iso()
+    if not app_name:
+        raise HTTPException(status_code=400, detail="app required")
+    _last_phone_activity = {"app": app_name, "event": event, "ts": ts}
+    return {"ok": True, "app": app_name, "event": event, "ts": ts}
+
+
+@app.get("/phone/activity")
+async def get_phone_activity(request: Request):
+    """Return the most recent phone activity event."""
+    check_auth(request)
+    return _last_phone_activity or {}
+
+
+@app.post("/phone/weather")
+async def phone_weather(request: Request):
+    """iOS Shortcuts POST current weather here."""
+    check_auth(request)
+    global _last_weather
+    body = await request.json()
+    _last_weather = {**body, "ts": body.get("ts") or now_iso()}
+    return {"ok": True}
+
+
+@app.get("/phone/weather")
+async def get_phone_weather(request: Request):
+    """Return the most recent weather snapshot."""
+    check_auth(request)
+    return _last_weather or {}
 
 
 @app.post("/app/ping")
@@ -1018,4 +1059,5 @@ async def app_sessions_patch(session_id: str, request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=PORT)
+    HOST = os.environ.get("RELAY_HOST", "0.0.0.0")
+    uvicorn.run(app, host=HOST, port=PORT)
