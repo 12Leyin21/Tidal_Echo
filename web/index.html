@@ -2166,6 +2166,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.2h3.3L12 5v14l-4.7-4.2H4z" fill="currentColor" stroke-width="1.2"/><path d="M15.6 9.2a4 4 0 0 1 0 5.6"/><path d="M18.2 6.6a7.5 7.5 0 0 1 0 10.8"/></svg>
         <span>扬声器</span>
       </button>
+      <button class="call-ctrl-btn" id="callLangBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.6 3.7 5.8 3.7 9s-1.3 6.4-3.7 9c-2.4-2.6-3.7-5.8-3.7-9s1.3-6.4 3.7-9Z"/></svg>
+        <span id="callLangLabel">中文</span>
+      </button>
     </div>
     <button class="call-hangup" id="callHangup" type="button" aria-label="挂断">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.996.996 0 0 0-1.01.24l-1.57 1.97a15.045 15.045 0 0 1-6.59-6.59l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
@@ -2512,6 +2516,8 @@ if (themeSeg) themeSeg.addEventListener("click", e => {
   const callMuteBtn  = $("#callMuteBtn");
   const callPrivateBtn = $("#callPrivateBtn");
   const callSpeakerBtn = $("#callSpeakerBtn");
+  const callLangBtn = $("#callLangBtn");
+  const callLangLabel = $("#callLangLabel");
 
   const VU_BARS = 16;   // 每侧声纹竖条数
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2520,6 +2526,9 @@ if (themeSeg) themeSeg.addEventListener("click", e => {
   let minimized = false;
   let muted = false;
   let privateMode = false;
+  let recognitionLang = (function(){ try{ return localStorage.getItem("companion_call_lang") || "zh-CN"; }catch(_){ return "zh-CN"; } })();
+  if (callLangLabel) callLangLabel.textContent = recognitionLang === "en-US" ? "EN" : "中文";
+  if (callLangBtn) callLangBtn.classList.toggle("active", recognitionLang === "en-US");
   let audioSenseInterval = null;
   let secs = 0, tickId = null, hideId = null, rafId = null;
   let waveBuilt = false;
@@ -2781,7 +2790,7 @@ if (themeSeg) themeSeg.addEventListener("click", e => {
     stopRecognition();
     recognitionWanted = true;
     recognition = new SpeechRecognition();
-    recognition.lang = "zh-CN";
+    recognition.lang = recognitionLang;
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
@@ -3062,6 +3071,14 @@ if (themeSeg) themeSeg.addEventListener("click", e => {
   });
   if (callSpeakerBtn) callSpeakerBtn.addEventListener("click", () => {
     callSpeakerBtn.classList.toggle("active");
+  });
+  if (callLangBtn) callLangBtn.addEventListener("click", () => {
+    recognitionLang = recognitionLang === "zh-CN" ? "en-US" : "zh-CN";
+    try{ localStorage.setItem("companion_call_lang", recognitionLang); }catch(_){}
+    if (callLangLabel) callLangLabel.textContent = recognitionLang === "en-US" ? "EN" : "中文";
+    callLangBtn.classList.toggle("active", recognitionLang === "en-US");
+    setTranscript(recognitionLang === "en-US" ? "Switched to English." : "已切换成中文识别。", true);
+    if (recognitionWanted) startRecognition();
   });
   callBtn.addEventListener("click", () => { open ? closeCall() : void openCall(); });
   hangup.addEventListener("click", closeCall);
