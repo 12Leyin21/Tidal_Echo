@@ -684,7 +684,14 @@ app.add_middleware(
 
 @app.get("/healthz")
 async def healthz():
-    return {"ok": True, "plugin_subs": len(plugin_subs), "app_subs": len(app_subs)}
+    with db() as conn:
+        row = conn.execute("SELECT MAX(id) AS id FROM messages").fetchone()
+    return {
+        "ok": True,
+        "plugin_subs": len(plugin_subs),
+        "app_subs": len(app_subs),
+        "latest_id": int(row["id"] or 0),
+    }
 
 
 # ---- AI side ---------------------------------------------------------------

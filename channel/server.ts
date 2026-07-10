@@ -118,6 +118,29 @@ function advanceInId(id: number): void {
   }
 }
 
+// The relay backend has no persistent disk on its free tier: a redeploy or an
+// idle-timeout restart wipes its sqlite db and message ids start over from 1.
+// If our on-disk cursor is still pointing past whatever the relay now has,
+// every ?since=<lastInId> poll comes back empty forever — not because we're
+// caught up, but because we're asking for ids that no longer exist. Detect
+// that by comparing against /healthz's latest_id and self-heal by rewinding
+// to 0 (replays the relay's current backlog once, which is harmless).
+async function healStaleCursor(): Promise<void> {
+  try {
+    const res = await fetch(`${RELAY}/healthz`)
+    if (!res.ok) return
+    const body = (await res.json()) as { latest_id?: number }
+    const latestId = Number(body.latest_id) || 0
+    if (lastInId > latestId) {
+      tlog('in', `cursor ${lastInId} is past relay's latest_id ${latestId} (relay db was reset) — rewinding to 0`)
+      lastInId = 0
+      writeNumberFile(IN_LAST_FILE, 0)
+    }
+  } catch (err) {
+    tlog('err', `healStaleCursor check failed (non-fatal): ${err}`)
+  }
+}
+
 // ---------------------------------------------------------------------------
 // MCP server (the channel itself) — leg 1
 // ---------------------------------------------------------------------------
@@ -387,6 +410,7 @@ async function streamInbound(): Promise<void> {
       }, 10000)
       let reader: ReadableStreamDefaultReader<Uint8Array> | null = null
       try {
+        await healStaleCursor()
         const res = await fetch(`${RELAY}/channel/in?since=${lastInId}`, {
           headers: { Authorization: `Bearer ${SECRET}`, Accept: 'text/event-stream' },
           signal: streamAbort.signal,
