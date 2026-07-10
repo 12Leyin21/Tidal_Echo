@@ -2882,21 +2882,21 @@ if (themeSeg) themeSeg.addEventListener("click", e => {
   }
 
   let ttsCtx = null;
-  function ensureTtsCtx(){
+  async function ensureTtsCtx(){
     if (ttsCtx && ttsCtx.state !== "closed") {
-      if (ttsCtx.state === "suspended") ttsCtx.resume().catch(() => {});
+      if (ttsCtx.state === "suspended") await ttsCtx.resume().catch(() => {});
       return ttsCtx;
     }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
     ttsCtx = new AC();
-    ttsCtx.resume().catch(() => {});
+    await ttsCtx.resume().catch(() => {});
     const buf = ttsCtx.createBuffer(1, 1, 22050);
     const src = ttsCtx.createBufferSource();
     src.buffer = buf;
     src.connect(ttsCtx.destination);
     src.start(0);
-    console.log("[call] AudioContext created & resumed");
+    console.log("[call] AudioContext created & resumed, state:", ttsCtx.state);
     return ttsCtx;
   }
 
@@ -2915,7 +2915,7 @@ if (themeSeg) themeSeg.addEventListener("click", e => {
     if (open) return;
     open = true;
     hideIncomingCall();
-    ensureTtsCtx();
+    void ensureTtsCtx();
     callId = "call-" + Date.now().toString(36);
     buildVu();
     clearTimeout(hideId);
@@ -3004,7 +3004,7 @@ if (themeSeg) themeSeg.addEventListener("click", e => {
       const blob = await apiTts(text);
       console.log("[speak] blob:", blob && blob.size);
       if (blob && open){
-        const ctx = ensureTtsCtx();
+        const ctx = await ensureTtsCtx();
         if (ctx){
           const arrayBuf = await blob.arrayBuffer();
           const audioBuf = await ctx.decodeAudioData(arrayBuf);
