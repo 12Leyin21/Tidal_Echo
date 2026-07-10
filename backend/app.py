@@ -71,6 +71,12 @@ MINIMAX_MODEL = os.environ.get("MINIMAX_MODEL", "speech-02-hd")
 MINIMAX_VOICE_ZH = os.environ.get("MINIMAX_VOICE_ZH", "")
 MINIMAX_TTS_TIMEOUT = float(os.environ.get("MINIMAX_TTS_TIMEOUT", "30"))
 
+# --- ElevenLabs TTS (optional — takes priority over MiniMax when configured) -
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "")
+ELEVENLABS_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_flash_v2_5")
+ELEVENLABS_TTS_TIMEOUT = float(os.environ.get("ELEVENLABS_TTS_TIMEOUT", "30"))
+
 # --- Web Push (VAPID, optional) — push unread replies to the PWA lock screen
 VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "")
 VAPID_PRIVATE_PEM = os.environ.get("VAPID_PRIVATE_PEM", "")   # PEM file path OR inline PEM text
@@ -571,6 +577,41 @@ def minimax_tts_mp3(text: str) -> bytes:
         raise HTTPException(status_code=502, detail="bad minimax audio payload")
 
 
+def elevenlabs_tts_mp3(text: str) -> bytes:
+    if not ELEVENLABS_API_KEY or not ELEVENLABS_VOICE_ID:
+        raise HTTPException(status_code=503, detail="elevenlabs tts not configured")
+    clean = (text or "").strip()
+    if not clean:
+        raise HTTPException(status_code=400, detail="empty text")
+    clean = clean[:900]
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{ELEVENLABS_VOICE_ID}"
+    payload = {
+        "text": clean,
+        "model_id": ELEVENLABS_MODEL,
+        "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=ELEVENLABS_TTS_TIMEOUT) as resp:
+            audio = resp.read()
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")[:300]
+        raise HTTPException(status_code=502, detail=f"elevenlabs tts failed: {detail}")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"elevenlabs tts failed: {exc}")
+    if not audio:
+        raise HTTPException(status_code=502, detail="elevenlabs tts returned no audio")
+    return audio
+
+
 def sse_data(payload: dict) -> str:
     lines: list[str] = []
     event_id = payload.get("id")
@@ -814,10 +855,14 @@ async def app_call(request: Request):
 
 @app.post("/app/tts")
 async def app_tts(request: Request):
-    """Generate MiniMax speech for an AI reply. The frontend falls back if unavailable."""
+    """Generate speech for an AI reply. Prefers ElevenLabs, falls back to MiniMax."""
     check_auth(request)
     body = await request.json()
-    audio = minimax_tts_mp3(body.get("text") or "")
+    text = body.get("text") or ""
+    if ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID:
+        audio = elevenlabs_tts_mp3(text)
+    else:
+        audio = minimax_tts_mp3(text)
     return Response(
         content=audio,
         media_type="audio/mpeg",
